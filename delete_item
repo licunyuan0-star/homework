@@ -1,0 +1,18 @@
+from typing import Iterable,Any
+
+class Deleteitem:
+    def __init__(self,iterable:Iterable[Any]):
+        self.iterable=list(iterable)
+
+    def delete(self,index_to_delete:int)->Any:
+        length_of_iterable:int=len(self.iterable)
+
+        for i in range(length_of_iterable-1,index_to_delete,-1):
+            self.iterable[i-1]=self.iterable[i]
+
+        self.iterable.pop()
+
+iterable1=("apple","banana","pear","watermelon")
+delete_item=Deleteitem(iterable1)
+delete_item.delete(2)
+print(delete_item.iterable)
