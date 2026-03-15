@@ -1,0 +1,50 @@
+from typing import Any, Sequence
+
+class OrderedArray:
+    """有序数组，支持插入操作保持有序性"""
+    
+    def __init__(self, iterable: Sequence[Any]) -> None:
+        """
+        初始化有序数组
+        :param iterable: 初始有序序列
+        """
+        self._data = list(iterable)          # 存储数据的列表
+        self._length = len(self._data)        # 当前元素个数
+    
+    def insert(self, element: Any) -> None:
+        """
+        插入元素，保持数组有序
+        :param element: 待插入的元素
+        """
+        # 查找插入位置
+        insert_index = self._length            # 默认插入末尾
+        for i, value in enumerate(self._data):
+            if element < value:
+                insert_index = i
+                break
+        
+        # 在末尾添加占位符，为移动元素腾出空间
+        self._data.append(None)
+        
+        # 从后向前移动元素，腾出插入位置
+        for i in range(self._length, insert_index, -1):
+            self._data[i] = self._data[i - 1]
+        
+        # 插入新元素
+        self._data[insert_index] = element
+        self._length += 1                       # 更新长度
+    
+    def __repr__(self) -> str:
+        return f"OrderedArray({self._data})"
+    
+    def __len__(self) -> int:
+        return self._length
+#测试实例
+arr = OrderedArray([1, 3, 5, 7])
+arr.insert(4)
+print(arr)          # OrderedArray([1, 3, 4, 5, 7])
+arr.insert(0)
+print(arr)          # OrderedArray([0, 1, 3, 4, 5, 7])
+arr.insert(9)
+print(arr)          # OrderedArray([0, 1, 3, 4, 5, 7, 9])
+print(len(arr))     # 7
