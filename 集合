@@ -1,0 +1,71 @@
+class MySet:
+    """一个简单的集合类，支持插入、删除和查询操作"""
+
+    def __init__(self, iterable=None):
+        """
+        初始化集合
+        :param iterable: 可选的可迭代对象，用于初始填充集合
+        """
+        self._data = set(iterable) if iterable else set()
+
+    def add(self, element):
+        """
+        向集合中添加一个元素（如果已存在则忽略）
+        :param element: 要添加的元素
+        """
+        self._data.add(element)
+
+    def remove(self, element):
+        """
+        从集合中移除一个元素，如果元素不存在则抛出 KeyError
+        :param element: 要移除的元素
+        """
+        self._data.remove(element)
+
+    def discard(self, element):
+        """
+        从集合中移除一个元素，如果元素不存在则什么也不做
+        :param element: 要移除的元素
+        """
+        self._data.discard(element)
+
+    def __contains__(self, element):
+        """
+        实现成员关系测试（in 操作符），用于查询元素是否存在
+        :param element: 要查询的元素
+        :return: 如果元素在集合中返回 True，否则返回 False
+        """
+        return element in self._data
+
+    def __len__(self):
+        """返回集合中元素的个数"""
+        return len(self._data)
+
+    def __repr__(self):
+        """返回集合的字符串表示"""
+        return f"MySet({list(self._data)})"
+
+
+# 演示代码
+if __name__ == "__main__":
+    s = MySet([1, 2, 3, 2])        # 重复元素 2 只会保留一个
+    print(s)                        # 输出: MySet([1, 2, 3])
+
+    # 查询
+    print(2 in s)                    # True
+    print(5 in s)                    # False
+
+    # 插入
+    s.add(4)
+    print(s)                         # MySet([1, 2, 3, 4])
+
+    # 删除（元素存在）
+    s.remove(2)
+    print(s)                         # MySet([1, 3, 4])
+
+    # 删除（元素不存在）
+    # s.remove(10)                    # 会抛出 KeyError
+    s.discard(10)                     # 不会抛出异常，集合不变
+    print(s)                          # MySet([1, 3, 4])
+
+    print(len(s))                      # 3
