@@ -1,0 +1,55 @@
+class Hash_dict():
+    def __init__(self,size:int):
+        self.size=size
+        
+        self.table=[[]for _ in range(size)]
+        #创建初始表格
+
+    def hash_cal(self,key)->int:
+        return abs(hash(key))%self.size
+        #计算字符串的哈希函数值
+    
+    def put(self,key,value)->None:
+        index=self.hash_cal(key)
+        bucket=self.table[index]
+
+        for i,(old_key,_) in enumerate(bucket):
+            if old_key==key:
+                print(f"{old_key}已经更新为{key}->{value}")
+                bucket[i]=(key,value)
+                return
+            
+        print(f"插入{key}->{value}")
+        bucket.append((key,value))
+
+    def get(self,key):
+        index=self.hash_cal(key)
+        bucket=self.table[index]
+
+        for k,v in bucket:
+            if k==key:
+                return v
+        
+        return None
+        
+    def delete(self,key):
+        index=self.hash_cal(key)
+        bucket=self.table[index]
+
+        for i,(bucket_key,_) in enumerate(bucket):
+            if bucket_key==key:
+                del bucket[i]
+                print(f"{key}已删除")
+                return True
+        
+        print(f"未找到{key}")
+        return False
+
+#测试案例
+my_dict=Hash_dict(size=10)
+my_dict.put("apple",10001)
+my_dict.put("pear",10002)
+my_dict.put("strawberry",10003)
+print(my_dict.get("pear"))
+my_dict.delete("apple")
+print(my_dict.get("apple"))
