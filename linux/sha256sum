@@ -6,3 +6,79 @@ root@2786285f6689:~/sha256_homework# cat myfile.txt.sha256
 3867882e8ccc16bd6a1e3e214a46608f9cf5d21687bbb8c25751da3c47b48033  myfile.txt
 root@2786285f6689:~/sha256_homework# sha256sum -c myfile.txt.sha256
 myfile.txt: OK
+#生成文件
+
+root@2786285f6689:~# apt install git -y
+#下载GitHub
+
+root@2786285f6689:~# git config --global user.name "licunyuan"
+root@2786285f6689:~# git config --global user.email "licunyuan0@gmail.com"
+#配置GitHub
+
+root@2786285f6689:~# cd /root/sha256_homework
+root@2786285f6689:~/sha256_homework# git init
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint:
+hint:   git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint:   git branch -m <name>
+Initialized empty Git repository in /root/sha256_homework/.git/
+#准备本地仓库
+
+root@2786285f6689:~/sha256_homework# git add myfile.txt myfile.txt.sha256
+root@2786285f6689:~/sha256_homework# git commit -m "myhomework"
+[master (root-commit) e69c362] myhomework
+ 2 files changed, 2 insertions(+)
+ create mode 100644 myfile.txt
+ create mode 100644 myfile.txt.sha256
+#添加文件并提交
+
+root@2786285f6689:~# ssh-keygen -t ed25519 -C "licunyuan0@gmail.com"
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/root/.ssh/id_ed25519):
+Enter passphrase for "/root/.ssh/id_ed25519" (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /root/.ssh/id_ed25519
+Your public key has been saved in /root/.ssh/id_ed25519.pub
+The key fingerprint is:
+SHA256:+3BrX0KNVKuV7c14XStW7kRlpCyELFmWF1h+VSUIN5w licunyuan0@gmail.com
+The key's randomart image is:
++--[ED25519 256]--+
+|         ++B*+o.X|
+|        o.=+E+ O.|
+|         . .+ Boo|
+|           . B++=|
+|        S   +oo+*|
+|         . .. +. |
+|        o . . .. |
+|         +.. o   |
+|         .o..    |
++----[SHA256]-----+
+root@2786285f6689:~# cat ~/.ssh/id_ed25519.pub
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHFTmwDpcrf7ufagfJ0mRcTYOfArkJjeY/LEL5/nn1qi licunyuan0@gmail.com
+root@2786285f6689:~# ssh -T git@github.com
+Hi licunyuan0-star! You've successfully authenticated, but GitHub does not provide shell access.
+#创建公钥
+
+root@2786285f6689:~# cd /root/sha256_homework
+root@2786285f6689:~/sha256_homework# git remote set-url origin git@github.com:licunyuan0-star/homework.git
+root@2786285f6689:~/sha256_homework# git push -u origin master
+Enumerating objects: 4, done.
+Counting objects: 100% (4/4), done.
+Delta compression using up to 128 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 329 bytes | 329.00 KiB/s, done.
+Total 4 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+remote:
+remote: Create a pull request for 'master' on GitHub by visiting:
+remote:      https://github.com/licunyuan0-star/homework/pull/new/master
+remote:
+To github.com:licunyuan0-star/homework.git
+ * [new branch]      master -> master
+branch 'master' set up to track 'origin/master'.
+#推送文件
