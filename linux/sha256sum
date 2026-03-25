@@ -1,0 +1,8 @@
+root@2786285f6689:/# mkdir /root/sha256_homework
+root@2786285f6689:/# cd /root/sha256_homework
+root@2786285f6689:~/sha256_homework# echo "myfile" >myfile.txt
+root@2786285f6689:~/sha256_homework# sha256sum myfile.txt > myfile.txt.sha256
+root@2786285f6689:~/sha256_homework# cat myfile.txt.sha256
+3867882e8ccc16bd6a1e3e214a46608f9cf5d21687bbb8c25751da3c47b48033  myfile.txt
+root@2786285f6689:~/sha256_homework# sha256sum -c myfile.txt.sha256
+myfile.txt: OK
