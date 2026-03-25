@@ -1,0 +1,11 @@
+root@2786285f6689:~# cd /usr/bin
+root@2786285f6689:/usr/bin# ls -lh chmod
+-rwxr-xr-x 1 root root 71K Jun  4  2025 chmod
+root@2786285f6689:/usr/bin# chmod 000 chmod
+root@2786285f6689:/usr/bin# ls -lh chmod
+---------- 1 root root 71K Jun  4  2025 chmod
+root@2786285f6689:/usr/bin# chmod 755 chmod
+-bash: /usr/bin/chmod: Permission denied
+root@2786285f6689:/usr/bin# perl -e 'chmod 0755, "/usr/bin/chmod"'
+root@2786285f6689:/usr/bin# ls -lh chmod
+-rwxr-xr-x 1 root root 71K Jun  4  2025 chmod
