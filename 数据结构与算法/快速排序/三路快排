@@ -1,0 +1,48 @@
+import random
+from typing import Sequence, Any, List
+
+class ThreeWayQuickSorter:
+    def __init__(self, seq: Sequence[Any]):
+        self._original = seq
+
+    def sort(self) -> List[Any]:
+        """返回排序后的新列表（升序）"""
+        arr = list(self._original)
+        self._three_way_quick_sort(arr, 0, len(arr) - 1)
+        return arr
+
+    def _three_way_quick_sort(self, arr: List[Any], left: int, right: int) -> None:
+        if left >= right:
+            return
+
+        # 随机选择基准并与 left 交换（避免最坏情况）
+        rand_idx = random.randint(left, right)
+        arr[left], arr[rand_idx] = arr[rand_idx], arr[left]
+        pivot = arr[left]
+
+        lt = left      # arr[left+1 .. lt-1] < pivot
+        i = left + 1   # 当前扫描元素
+        gt = right     # arr[gt+1 .. right] > pivot
+
+        while i <= gt:
+            if arr[i] < pivot:
+                arr[lt], arr[i] = arr[i], arr[lt]
+                lt += 1
+                i += 1
+            elif arr[i] == pivot:
+                i += 1
+            else:  # arr[i] > pivot
+                arr[i], arr[gt] = arr[gt], arr[i]
+                gt -= 1
+
+        # 递归处理小于和大于区域（等于区域已经就位）
+        self._three_way_quick_sort(arr, left, lt - 1)
+        self._three_way_quick_sort(arr, gt + 1, right)
+
+
+# 示例
+if __name__ == "__main__":
+    data = [3, 6, 8, 10, 1, 2, 1, 5, 5, 5, 3, 3]
+    sorter = ThreeWayQuickSorter(data)
+    sorted_data = sorter.sort()
+    print(sorted_data)  # [1, 1, 2, 3, 3, 3, 5, 5, 5, 6, 8, 10]
