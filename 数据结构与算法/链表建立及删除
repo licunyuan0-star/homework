@@ -1,0 +1,89 @@
+class Node:
+    def __init__(self,data):
+        self.data=data
+        self.next:Node=None
+#定义节点
+class Linkedlist:
+    def __init__(self):
+        self.head:Node=None
+#初始化链表
+    def display(self):
+        """打印整个链表"""
+        elements=[]
+        current = self.head
+        while current:
+            elements.append(str(current.data))
+            current = current.next
+        print(" -> ".join(elements) + " -> None")
+
+    def append(self,data):
+        """创建链表（在末端添加节点）"""
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return
+        last_node = self.head
+        while last_node.next:
+            last_node = last_node.next
+        last_node.next = new_node
+
+    def insert_after_node(self, prev_node_data, data):
+        """在指定数据的节点之后插入新节点"""
+        current = self.head
+        while current and current.data != prev_node_data:
+            current = current.next
+        
+        if not current:
+            print(f"节点 {prev_node_data} 不存在")
+            return
+        
+        new_node = Node(data)
+        new_node.next = current.next
+        current.next = new_node
+
+    def delete_by_value(self, value):
+        """按值删除节点"""
+        current = self.head
+
+        # 情况1: 如果头节点就是要删除的节点
+        if current and current.data == value:
+            self.head = current.next
+            current = None
+            return
+
+        # 情况2: 查找要删除的节点，保留前驱节点
+        prev = None
+        while current and current.data != value:
+            prev = current
+            current = current.next
+
+        # 如果没找到
+        if not current:
+            print(f"未找到值为 {value} 的节点")
+            return
+
+        # 将前驱节点指向待删除节点的下一个节点
+        prev.next = current.next
+        current = None
+        
+ # --- 测试代码 ---
+if __name__ == "__main__":
+    llist = Linkedlist()
+
+    # 插入测试
+    llist.append("A")
+    llist.append("B")
+    llist.insert_after_node("A", "B.5") # 链表变为: A -> B.5 -> B
+    
+    print("插入后的链表:")
+    llist.display()
+
+    
+    # 删除测试
+    print("\n删除节点 'B' 后:")
+    llist.delete_by_value("B")
+    llist.display()
+
+    print("\n删除头节点 'A' 后:")
+    llist.delete_by_value("A")
+    llist.display()           
