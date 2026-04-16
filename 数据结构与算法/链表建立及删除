@@ -65,6 +65,31 @@ class Linkedlist:
         # 将前驱节点指向待删除节点的下一个节点
         prev.next = current.next
         current = None
+
+    def delete_by_index(self,index):
+        """按索引删除节点"""
+        if self.head is None:
+            print("链表为空不能删除")
+            return
+        
+        current=self.head
+        #删除头节点
+        if index==0:
+            self.head=current.next
+            current=None
+            return
+        #删除中间节点
+        prev=None
+        count=0
+        if current and count<index:
+            prev=current
+            current=current.next
+            count+=1
+        if current is None:
+            print("索引超出范围")
+        if current:
+            prev.next=current.next
+            current=None
         
  # --- 测试代码 ---
 if __name__ == "__main__":
@@ -87,3 +112,11 @@ if __name__ == "__main__":
     print("\n删除头节点 'A' 后:")
     llist.delete_by_value("A")
     llist.display()           
+
+    llist.append("C")
+    llist.append("D")  
+
+    print("\n删除索引 2 的节点 :")
+    llist.delete_by_index(2)
+    llist.display()
+     
