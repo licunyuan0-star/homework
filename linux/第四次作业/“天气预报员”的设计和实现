@@ -1,0 +1,184 @@
+#设计
+#1.想法：创造一个充满未来感、互动性强的天气显示界面。
+#2.功能拆解：
+#获取数据： 需要一个可靠的在线天气 API。OpenWeatherMap 是一个常用且提供免费层级的选择。
+#数据解析： API 返回的数据通常是 JSON 格式，需要工具来解析提取所需信息。jq 是处理 JSON 的利器。
+#数据显示：城市名称、温度、天气描述、体感温度、湿度、风速等。
+#AI 角色：需要一个 ASCII 艺术绘制的 AI 框架。
+#交互与刷新： 脚本一次性运行，但可以结合 watch 命令实现周期性刷新。
+#错误处理： 需要处理 API Key 错误、城市未找到、网络问题等情况。
+#3.工具选型：
+#curl: 发送 HTTP 请求获取 API 数据。
+#jq: 解析 curl 返回的 JSON 数据，提取具体字段。
+#toilet: 生成大型字符艺术字体。选择它而非 figlet 是因为它提供了更多的字体和颜色效果（如 --metal, --gay, --red 等）。
+#bash: 编写脚本的 Shell 环境，用于控制流程、变量、条件判断等。
+#tput: 用于终端控制，如 tput clear 清屏，确保每次刷新界面干净。
+#echo -e: 启用对 ANSI 转义序列（颜色码）的解释。
+#sed: 用于文本处理，例如将天气描述的首字母大写。
+#bc: 用于浮点数运算，比较温度值
+
+
+#实现
+# 对于 Debian/Ubuntu 系统
+apt update
+apt install curl jq toilet bc
+#获取API key
+nano /usr/local/bin/cyberpunk_weather.sh
+chmod +x /usr/local/bin/cyberpunk_weather.sh
+cyberpunk_weather.sh
+#脚本：
+#!/bin/bash
+
+# --- 配置 ---
+API_KEY="YOUR_API_KEY" # <<<<<<<< 替换为你的 OpenWeatherMap API Key !!!
+CITY="London"          # 你想要查询的城市，可以是英文名，例如 "Beijing", "Tokyo", "New York"
+UNIT="metric"          # 单位: metric (摄氏度) 或 imperial (华氏度)
+
+# --- 颜色定义 (赛博朋克风格) ---
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# --- ASCII 艺术 AI 形象 (根据天气状态调整) ---
+AI_FRAME_TOP="${MAGENTA}  ___  ${NC}"
+AI_FRAME_MID="${MAGENTA} |   | ${NC}"
+AI_FRAME_BOT="${MAGENTA} \\___/${NC}"
+
+get_ai_face() {
+    local weather_main=$1 # 天气主描述
+    local temp_c=$2       # 摄氏温度
+
+    local eyes="o o"
+    local mouth="\\__/"
+    local text_message="Analyzing weather patterns... Stand by."
+    local text_color="${YELLOW}"
+
+    case "$weather_main" in
+        "Clear")
+            eyes="^ ^"
+            mouth="\\_/"
+            text_message="Optimal conditions for cyber-strolls. Stay sharp."
+            text_color="${CYAN}"
+            ;;
+        "Clouds")
+            eyes="- -"
+            mouth="--.--"
+            text_message="Sky is hazy. Atmospheric anomalies detected."
+            text_color="${MAGENTA}"
+            ;;
+        "Rain"|"Drizzle")
+            eyes="0 0"
+            mouth="_____"
+            text_message="Wetware detected. Recommend umbrella module."
+            text_color="${BLUE}"
+            ;;
+        "Thunderstorm")
+            eyes="X X"
+            mouth=">O<"
+            text_message="High voltage in atmosphere! Seek cover, meatbag."
+            text_color="${RED}"
+            ;;
+        "Snow")
+            eyes="* *"
+            mouth="= = "
+            text_message="Cryo-precipitation detected. Stay warm, unit."
+            text_color="${CYAN}"
+            ;;
+        *) # Default
+            eyes="o o"
+            mouth="\\_/"
+            text_message="Unknown atmospheric status. Proceed with caution."
+            text_color="${YELLOW}"
+            ;;
+    esac
+
+    # 根据温度调整 AI 的“情绪”
+    if (( $(echo "$temp_c < 0" | bc -l) )); then
+        mouth="~~~" # 冻得发抖
+        if [[ "$weather_main" != "Snow" ]]; then
+            text_message="Below zero. My circuits are chattering. ${text_message}"
+            text_color="${BLUE}"
+        fi
+    elif (( $(echo "$temp_c > 30" | bc -l) )); then
+        mouth="V_V" # 热得流汗
+        text_message="Heatwave detected. Optimal for data-mining, less for organics. ${text_message}"
+        text_color="${RED}"
+    fi
+
+    echo -e "${AI_FRAME_TOP}"
+    echo -e "${MAGENTA} | ${eyes} | ${NC}"
+    echo -e "${MAGENTA} | ${mouth} | ${NC}"
+    echo -e "${AI_FRAME_BOT}"
+    echo -e "${text_color}>> ${text_message}${NC}"
+}
+
+
+# --- 清屏函数 ---
+clear_screen() {
+    tput clear
+}
+
+# --- 主逻辑 ---
+clear_screen
+
+echo -e "${CYAN}┌──────────────────────────────────────────────┐${NC}"
+echo -e "${CYAN}│        ${YELLOW}CYBERPUNK WEATHER INTERFACE v0.1        ${CYAN}│${NC}"
+echo -e "${CYAN}└──────────────────────────────────────────────┘${NC}"
+echo ""
+
+# 获取天气数据
+WEATHER_DATA=$(curl -s "api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=${UNIT}")
+
+# 检查 API 是否返回错误
+if echo "$WEATHER_DATA" | jq -e '.cod | select(. == "401")' > /dev/null; then
+    echo -e "${RED}ERROR: Invalid API Key. Please check your API_KEY setting.${NC}"
+    exit 1
+elif echo "$WEATHER_DATA" | jq -e '.cod | select(. == "404")' > /dev/null; then
+    echo -e "${RED}ERROR: City not found. Please check your CITY setting.${NC}"
+    exit 1
+fi
+
+# 解析数据
+CITY_NAME=$(echo "$WEATHER_DATA" | jq -r '.name')
+TEMP=$(echo "$WEATHER_DATA" | jq -r '.main.temp')
+FEELS_LIKE=$(echo "$WEATHER_DATA" | jq -r '.main.feels_like')
+WEATHER_MAIN=$(echo "$WEATHER_DATA" | jq -r '.weather[0].main')
+WEATHER_DESC=$(echo "$WEATHER_DATA" | jq -r '.weather[0].description')
+HUMIDITY=$(echo "$WEATHER_DATA" | jq -r '.main.humidity')
+WIND_SPEED=$(echo "$WEATHER_DATA" | jq -r '.wind.speed')
+
+# 格式化温度显示
+TEMP_DISPLAY="${TEMP}°$( [ "$UNIT" == "metric" ] && echo "C" || echo "F" )"
+
+# 根据温度设置 toilet 的颜色
+TOILET_COLOR=""
+if (( $(echo "$TEMP < 0" | bc -l) )); then
+    TOILET_COLOR="--metal" # 蓝色系冷色
+elif (( $(echo "$TEMP < 15" | bc -l) )); then
+    TOILET_COLOR="--gay" # 绿色系
+elif (( $(echo "$TEMP < 25" | bc -l) )); then
+    TOILET_COLOR="--filter border" # 默认，或暖色
+else
+    TOILET_COLOR="--red" # 红色警告
+fi
+
+echo -e "${YELLOW}City: ${MAGENTA}${CITY_NAME}${NC}"
+echo "----------------------------------------------"
+toilet -f mono12 $TOILET_COLOR "${TEMP_DISPLAY}"
+echo "----------------------------------------------"
+echo -e "  ${YELLOW}Condition: ${MAGENTA}$(echo "$WEATHER_DESC" | sed 's/\b./\u&/g')${NC}"
+echo -e "  ${YELLOW}Feels Like: ${MAGENTA}${FEELS_LIKE}°$( [ "$UNIT" == "metric" ] && echo "C" || echo "F" )${NC}"
+echo -e "  ${YELLOW}Humidity: ${MAGENTA}${HUMIDITY}%${NC}"
+echo -e "  ${YELLOW}Wind Speed: ${MAGENTA}${WIND_SPEED} m/s${NC}"
+
+echo ""
+get_ai_face "$WEATHER_MAIN" "$TEMP"
+echo ""
+
+echo -e "${CYAN}┌──────────────────────────────────────────────┐${NC}"
+echo -e "${CYAN}│ Last Data Sync: ${YELLOW}$(date '+%Y-%m-%d %H:%M:%S')${CYAN} │${NC}"
+echo -e "${CYAN}└──────────────────────────────────────────────┘${NC}"
