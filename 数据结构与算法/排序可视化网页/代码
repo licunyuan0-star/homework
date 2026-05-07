@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>归并排序可视化 - 分步演示</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #d8f0e6;  /* 浅绿色背景 */
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        /* 主卡片容器 */
+        .merge-container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255,255,240,0.65);
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            padding: 28px 24px 36px;
+            box-shadow: 0 20px 35px rgba(60, 80, 20, 0.2);
+            transition: all 0.2s;
+        }
+
+        /* 标题区 */
+        .title {
+            text-align: center;
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: #1a5f2a;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 0 #cfe8cf;
+            word-break: keep-all;
+        }
+        .sub {
+            text-align: center;
+            color: #2c6e3c;
+            border-bottom: 2px dashed #84b37e;
+            display: inline-block;
+            width: auto;
+            margin: 0 auto 20px;
+            padding-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* 控制栏 */
+        .control-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0 28px;
+            align-items: center;
+        }
+        .input-group {
+            display: flex;
+            background: white;
+            border-radius: 60px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #cce3d4;
+        }
+        .input-group input {
+            border: none;
+            padding: 12px 18px;
+            font-size: 1rem;
+            width: 260px;
+            outline: none;
+            font-family: monospace;
+            background: #feffea;
+        }
+        .input-group button {
+            background: #367a45;
+            border: none;
+            color: white;
+            padding: 0 22px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            letter-spacing: 1px;
+        }
+        .input-group button:hover {
+            background: #1f5a2e;
+            transform: scale(0.97);
+        }
+
+        .step-btn {
+            background: #2c6e3c;
+            border: none;
+            color: white;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .step-btn:active {
+            transform: translateY(2px);
+        }
+        .step-btn:disabled {
+            background: #9bbf92;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
+        }
+        .info-area {
+            background: #eef6ea;
+            border-radius: 32px;
+            padding: 8px 20px;
+            display: inline-flex;
+            gap: 28px;
+            margin: 0 auto 18px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            color: #1e4620;
+            justify-content: center;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+        .info-area span {
+            background: white;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #1f5430;
+        }
+
+        /* 可视化区域 */
+        .viz-area {
+            background: #e2f3df;
+            border-radius: 28px;
+            padding: 24px 12px 20px;
+            margin: 15px 0 12px;
+            box-shadow: inset 0 0 0 2px #f9fff5, 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .cards-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            min-height: 280px;
+            overflow-x: auto;
+            padding: 12px 8px;
+            justify-content: center;
+        }
+        /* 卡片样式：蓝色条纹 + 高度映射数值 */
+        .card-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 54px;
+            transition: all 0.2s ease;
+        }
+        .card {
+            width: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                #1e6df2,
+                #1e6df2 14px,
+                #3b82f6 14px,
+                #3b82f6 28px
+            );
+            border-radius: 12px 12px 8px 8px;
+            box-shadow: 0 6px 0 #0a3b6e;
+            transition: height 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+            font-family: monospace;
+            min-height: 32px;
+        }
+        .card-value {
+            background: rgba(0,0,0,0.3);
+            width: 100%;
+            text-align: center;
+            border-radius: 8px;
+            padding: 2px 0;
+        }
+        .card-index {
+            font-size: 12px;
+            color: #2c5a2e;
+            margin-top: 8px;
+            font-weight: 500;
+            background: #fefce6;
+            padding: 2px 6px;
+            border-radius: 18px;
+        }
+        .desc-box {
+            background: #fdfbe6;
+            border-left: 8px solid #367a45;
+            padding: 12px 20px;
+            border-radius: 28px;
+            font-size: 1rem;
+            margin: 18px 0 6px;
+            text-align: center;
+            color: #174d21;
+            font-weight: 500;
+        }
+        .footer-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #548a51;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 680px) {
+            .card-item { width: 40px; }
+            .card { font-size: 0.8rem; }
+            .title { font-size: 2rem; }
+            .control-bar { gap: 8px; }
+            .input-group input { width: 160px; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="merge-container">
+    <div class="title">🌿 归并排序 · 分步演示 🌿</div>
+    <div style="text-align:center"><span class="sub">逐步合并有序子数组，每步完成一次归并</span></div>
+
+    <!-- 控制中心 -->
+    <div class="control-bar">
+        <div class="input-group">
+            <input type="text" id="arrayInput" placeholder="例: 5, 3, 8, 6, 2, 7, 1, 4" value="5,3,8,6,2,7,1,4">
+            <button id="initBtn">生成序列</button>
+        </div>
+        <button id="nextStepBtn" class="step-btn">▶ 下一步 · 归并</button>
+    </div>
+
+    <div style="display: flex; justify-content: center;">
+        <div class="info-area">
+            <div>📌 当前步数: <span id="currentStep">0</span> / <span id="totalSteps">0</span></div>
+            <div>📊 总归并次数: <span id="totalMergesLabel">0</span></div>
+        </div>
+    </div>
+
+    <!-- 可视化区 -->
+    <div class="viz-area">
+        <div class="cards-container" id="cardsContainer"></div>
+        <div class="desc-box" id="stepDescription">
+            ✨ 点击「生成序列」加载数字，然后每点一次「下一步」执行一次归并合并 ✨
+        </div>
+    </div>
+    <div class="footer-note">
+        💡 归并排序核心流程：自底向上合并相邻有序块，每按一次完成一块合并，直至整体有序。<br>
+        🎨 卡片高度 = 数值大小，蓝色条纹样式，高度越大数越大。
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ---------- DOM 元素 ----------
+        const arrayInput = document.getElementById('arrayInput');
+        const initBtn = document.getElementById('initBtn');
+        const nextBtn = document.getElementById('nextStepBtn');
+        const cardsContainer = document.getElementById('cardsContainer');
+        const stepDescSpan = document.getElementById('stepDescription');
+        const currentStepSpan = document.getElementById('currentStep');
+        const totalStepsSpan = document.getElementById('totalSteps');
+        const totalMergesLabel = document.getElementById('totalMergesLabel');
+
+        // ---------- 全局状态 ----------
+        let currentArray = [];          // 当前显示的数组 (纯数字)
+        let mergeSteps = [];             // 存储每一步 (快照数组 + 描述)
+        let currentStepIdx = 0;          // 0 表示初始状态未开始，1..N 表示已执行步数
+        let totalStepsCount = 0;          // 总步数（归并次数）
+        
+        // ---------- 辅助函数 ----------
+        function parseInputToNumbers(str) {
+            let parts = str.split(/[ ,，]+/);
+            let nums = [];
+            for(let p of parts){
+                p = p.trim();
+                if(p === "") continue;
+                let num = Number(p);
+                if(!isNaN(num) && Number.isInteger(num) && num >= 0){
+                    nums.push(num);
+                } else {
+                    return null; // 非法字符
+                }
+            }
+            if(nums.length === 0) return null;
+            // 限制长度 15 保证可视化舒适，归并步骤合理
+            if(nums.length > 15) nums = nums.slice(0,15);
+            return nums;
+        }
+        
+        // 渲染卡片 (根据数组数值，高度线性映射 30px ~ 220px)
+        function renderArray(arr, highlightIndices = []) {
+            if(!arr || arr.length === 0){
+                cardsContainer.innerHTML = '<div style="padding: 2rem; color: #4a6741;">暂无数据，请生成数组</div>';
+                return;
+            }
+            const maxVal = Math.max(...arr, 1);
+            const minH = 34;
+            const maxH = 210;
+            cardsContainer.innerHTML = '';
+            arr.forEach((val, idx) => {
+                const heightRatio = val / maxVal;
+                const height = minH + (maxH - minH) * heightRatio;
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card-item';
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.height = `${Math.max(minH, Math.min(maxH, height))}px`;
+                const valSpan = document.createElement('div');
+                valSpan.className = 'card-value';
+                valSpan.innerText = val;
+                card.appendChild(valSpan);
+                const idxLabel = document.createElement('div');
+                idxLabel.className = 'card-index';
+                idxLabel.innerText = idx;
+                cardDiv.appendChild(card);
+                cardDiv.appendChild(idxLabel);
+                // 简单高亮（如果需要可扩展，当前无需额外高亮，但加一点柔光）
+                if(highlightIndices.includes(idx)){
+                    card.style.boxShadow = '0 0 0 3px #f9c74f, 0 6px 0 #0a3b6e';
+                    card.style.transform = 'scale(1.02)';
+                }
+                cardsContainer.appendChild(cardDiv);
+            });
+        }
+        
+        // ---------- 核心：生成归并排序的所有合并步骤 (自底向上，每次合并且记录一次完整归并) ----------
+        // 返回一个数组 steps: [{ array: 合并后的完整数组, description: 描述该次归并 }]
+        // 注意: 为了保证逐步演示有意义，每次调用 merge 两个相邻有序块后，记录一个新的快照。
+        // 并且步骤数量 = 将所有相邻有序块两两合并的次数（标准归并趟数总和）。
+        function generateMergeStepsFromArray(originalArr) {
+            let arr = [...originalArr];
+            const n = arr.length;
+            if(n <= 1) return [];   // 无需合并
+            
+            const steps = [];
+            // 记录初始快照（第0步为初始数组）
+            steps.push({
+                array: [...arr],
+                description: `📋 初始数组: [${arr.join(', ')}] ，准备开始归并排序（自底向上）`
+            });
+            
+            // 自底向上归并: size = 1,2,4,8...
+            for(let size = 1; size < n; size *= 2){
+                // 对于每个左起始位置
+                for(let leftStart = 0; leftStart < n - size; leftStart += 2*size){
+                    let mid = leftStart + size - 1;
+                    let rightEnd = Math.min(leftStart + 2*size - 1, n-1);
+                    // 如果右半部分不存在，跳过
+                    if(mid >= rightEnd) continue;
+                    
+                    // ---------- 执行一次归并 (合并 [leftStart..mid] 和 [mid+1..rightEnd]) ----------
+                    const leftArr = arr.slice(leftStart, mid+1);
+                    const rightArr = arr.slice(mid+1, rightEnd+1);
+                    let i = 0, j = 0, k = leftStart;
+                    const mergedTemp = [];
+                    while(i < leftArr.length && j < rightArr.length){
+                        if(leftArr[i] <= rightArr[j]){
+                            mergedTemp.push(leftArr[i]);
+                            i++;
+                        } else {
+                            mergedTemp.push(rightArr[j]);
+                            j++;
+                        }
+                    }
+                    while(i < leftArr.length){ mergedTemp.push(leftArr[i]); i++; }
+                    while(j < rightArr.length){ mergedTemp.push(rightArr[j]); j++; }
+                    
+                    // 将合并结果写回原数组
+                    for(let t = 0; t < mergedTemp.length; t++){
+                        arr[leftStart + t] = mergedTemp[t];
+                    }
+                    
+                    // 记录本次归并后的完整数组快照
+                    const rangeStr = `[${leftStart}..${rightEnd}]`;
+                    const leftPartStr = `[${leftStart}..${mid}]`, rightPartStr = `[${mid+1}..${rightEnd}]`;
+                    steps.push({
+                        array: [...arr],
+                        description: `🔀 归并区间 ${rangeStr} : 合并有序子数组 ${leftPartStr} 与 ${rightPartStr} → 得到 ${rangeStr} = [${mergedTemp.join(', ')}]`
+                    });
+                }
+            }
+            // 最后再添加一个完成标识（steps最后已经是完全排序的数组）
+            // 但最后一步描述为了好看再补一条，但避免重复，如果最后一条已经包含排序完成，可选加提示
+            const lastStep = steps[steps.length-1];
+            if(lastStep && !lastStep.description.includes("排序完成")){
+                steps.push({
+                    array: [...arr],
+                    description: `🎉 归并排序完成！ 最终有序序列: [${arr.join(', ')}] ，总共执行 ${steps.length-1} 次归并操作。`
+                });
+            } else if(steps.length === 1 && n<=1){
+                steps.push({
+                    array: [...arr],
+                    description: `✅ 数组已经有序（长度≤1），无需归并操作。`
+                });
+            }
+            return steps;
+        }
+        
+        // 重置状态并基于新数组生成步骤序列
+        function initWithArray(newArray) {
+            if(!newArray || newArray.length === 0){
+                alert("请输入有效数字 (非负整数，逗号分隔)");
+                return false;
+            }
+            currentArray = [...newArray];
+            // 生成步骤 (带初始快照)
+            const stepsWithInit = generateMergeStepsFromArray(currentArray);
+            mergeSteps = stepsWithInit;   // 第一个元素是初始数组快照
+            totalStepsCount = mergeSteps.length - 1;  // 归并次数（不包含初始快照）
+            currentStepIdx = 0;   // 当前展示第0个快照（初始状态）
+            
+            // 更新UI
+            renderArray(mergeSteps[0].array);
+            stepDescSpan.innerHTML = `✨ 初始状态 ✨ <br> ${mergeSteps[0].description}`;
+            currentStepSpan.innerText = currentStepIdx;
+            totalStepsSpan.innerText = totalStepsCount;
+            totalMergesLabel.innerText = totalStepsCount;
+            
+            // 按钮状态：未完成时可以继续
+            if(totalStepsCount === 0){
+                nextBtn.disabled = true;
+                stepDescSpan.innerHTML = "数组已完成排序或无归并操作，无需下一步。";
+            } else {
+                nextBtn.disabled = false;
+            }
+            return true;
+        }
+        
+        // 下一步：执行一次归并（跳转到下一个快照）
+        function nextMergeStep() {
+            if(!mergeSteps.length){
+                alert("请先点击「生成序列」初始化数组数据。");
+                return false;
+            }
+            if(currentStepIdx >= mergeSteps.length - 1){
+                // 已经是最后一步（排序完成）
+                stepDescSpan.innerHTML = "🏁 排序已完成！所有归并步骤已经执行完毕。 🏁";
+                nextBtn.disabled = true;
+                return false;
+            }
+            // 移到下一个快照
+            currentStepIdx++;
+            const stepData = mergeSteps[currentStepIdx];
+            if(stepData){
+                // 更新显示的数组
+                renderArray(stepData.array);
+                stepDescSpan.innerHTML = `📌 第 ${currentStepIdx} 步 / 共 ${totalStepsCount} 步 <br> ${stepData.description}`;
+                currentStepSpan.innerText = currentStepIdx;
+                // 如果已经完成最后一步 (currentStepIdx === mergeSteps.length-1)
+                if(currentStepIdx === mergeSteps.length - 1){
+                    nextBtn.disabled = true;
+                    stepDescSpan.innerHTML += `<br><span style="color:#2a7a32;">✅ 排序结束，总归并次数 = ${totalStepsCount} ✅</span>`;
+                } else {
+                    nextBtn.disabled = false;
+                }
+                return true;
+            }
+            return false;
+        }
+        
+        // 从输入框获取数据并重置全部流程
+        function handleGenerate() {
+            const raw = arrayInput.value.trim();
+            if(!raw){
+                alert("请输入数字，用逗号或空格分隔，例如 5,2,9,1");
+                return;
+            }
+            const nums = parseInputToNumbers(raw);
+            if(nums === null || nums.length === 0){
+                alert("输入无效，请使用非负整数并用逗号/空格分隔，如: 8, 3, 5, 1, 9");
+                return;
+            }
+            // 成功解析
+            initWithArray(nums);
+            // 同步输入框内容（格式化展示）
+            arrayInput.value = nums.join(', ');
+        }
+        
+        // 页面初次加载时自动用默认数组初始化
+        function autoInitOnLoad() {
+            const defaultStr = arrayInput.value.trim();
+            const nums = parseInputToNumbers(defaultStr);
+            if(nums && nums.length > 0){
+                initWithArray(nums);
+                arrayInput.value = nums.join(', ');
+            } else {
+                // fallback: 硬编码一组
+                const fallback = [5, 3, 8, 6, 2, 7, 1, 4];
+                initWithArray(fallback);
+                arrayInput.value = fallback.join(', ');
+            }
+        }
+        
+        // ---------- 绑定事件 ----------
+        initBtn.addEventListener('click', () => {
+            handleGenerate();
+        });
+        nextBtn.addEventListener('click', () => {
+            nextMergeStep();
+        });
+        
+        // 额外：若用户在输入框按回车触发生成
+        arrayInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                e.preventDefault();
+                handleGenerate();
+            }
+        });
+        
+        // 开始渲染
+        autoInitOnLoad();
+    })();
+</script>
+</body>
+</html>
