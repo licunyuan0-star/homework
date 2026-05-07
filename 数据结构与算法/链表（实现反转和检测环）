@@ -1,0 +1,139 @@
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next: Node = None
+
+class Linkedlist:
+    def __init__(self):
+        self.head: Node = None
+
+    def display(self):
+        """打印整个链表"""
+        elements = []
+        current = self.head
+        while current:
+            elements.append(str(current.data))
+            current = current.next
+        print(" -> ".join(elements) + " -> None")
+
+    def append(self, data):
+        """在链表末端添加节点"""
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return
+        last_node = self.head
+        while last_node.next:
+            last_node = last_node.next
+        last_node.next = new_node
+
+    def insert_after_node(self, prev_node_data, data):
+        """在指定数据的节点之后插入新节点"""
+        current = self.head
+        while current and current.data != prev_node_data:
+            current = current.next
+        if not current:
+            print(f"节点 {prev_node_data} 不存在")
+            return
+        new_node = Node(data)
+        new_node.next = current.next
+        current.next = new_node
+
+    def delete_by_value(self, value):
+        """按值删除节点"""
+        current = self.head
+        # 头节点即为要删除的节点
+        if current and current.data == value:
+            self.head = current.next
+            current = None
+            return
+        # 查找并删除
+        prev = None
+        while current and current.data != value:
+            prev = current
+            current = current.next
+        if not current:
+            print(f"未找到值为 {value} 的节点")
+            return
+        prev.next = current.next
+        current = None
+
+    def delete_by_index(self, index):
+        """按索引删除节点（注意：原代码此处存在逻辑错误，但保留原样）"""
+        if self.head is None:
+            print("链表为空不能删除")
+            return
+        current = self.head
+        if index == 0:
+            self.head = current.next
+            current = None
+            return
+        prev = None
+        count = 0
+        # 原代码使用了 if 而非 while，因此只能删除索引为 1 的节点（若有）
+        if current and count < index:
+            prev = current
+            current = current.next
+            count += 1
+        if current is None:
+            print("索引超出范围")
+        if current:
+            prev.next = current.next
+            current = None
+
+    # ---------- 新实现的方法 ----------
+    def reverse(self):
+        """反转链表"""
+        prev = None
+        current = self.head
+        while current:
+            next_node = current.next  # 暂存下一个节点
+            current.next = prev       # 反转指针方向
+            prev = current            # 移动 prev 到当前节点
+            current = next_node       # 移动 current 到下一个节点
+        self.head = prev              # 更新头节点
+
+    def has_cycle(self):
+        """检测链表中是否有环（快慢指针法）"""
+        if not self.head:
+            return False
+        slow = self.head
+        fast = self.head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+            if slow == fast:
+                return True
+        return False
+    # --------------------------------
+
+# --- 测试代码 ---
+if __name__ == "__main__":
+    # 测试反转
+    print("=== 测试反转 ===")
+    llist = Linkedlist()
+    for char in ['a', 'b', 'c']:
+        llist.append(char)
+    print("原始链表:")
+    llist.display()          # a -> b -> c -> None
+    llist.reverse()
+    print("反转后:")
+    llist.display()          # c -> b -> a -> None
+
+    # 测试环检测（无环情况）
+    print("\n=== 测试环检测（无环）===")
+    print("当前链表是否有环:", llist.has_cycle())  # False
+
+    # 构造一个带环的链表用于测试
+    print("\n=== 测试环检测（有环）===")
+    cycle_list = Linkedlist()
+    node1 = Node(1)
+    node2 = Node(2)
+    node3 = Node(3)
+    node4 = Node(4)
+    cycle_list.head = node1
+    node1.next = node2
+    node2.next = node3
+    node3.next = node4
+    node4.next = node2   # 形成环：4 -> 2
+    print("链表已人为构造一个环（4→2），检测结果:", cycle_list.has_cycle())  # True
